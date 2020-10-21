@@ -130,10 +130,20 @@
      <Compile Include="Assets\Ludiq\Ludiq.Chronos\Source\Timelines\WindZoneTimeline.cs" />
      <Compile Include="Assets\Ludiq\Ludiq.Chronos\Source\Utilities\Severity.cs" />
      <Compile Include="Assets\Ludiq\Ludiq.Chronos\Source\Utilities\Singleton.cs" />
+     <Compile Include="Assets\Scripts\Barrier.cs" />
      <Compile Include="Assets\Scripts\BaseTimeObject.cs" />
+     <Compile Include="Assets\Scripts\CargoInPoint.cs" />
+     <Compile Include="Assets\Scripts\CargoOutPoint.cs" />
+     <Compile Include="Assets\Scripts\ObjectPool.cs" />
+     <Compile Include="Assets\Scripts\Overlooker.cs" />
+     <Compile Include="Assets\Scripts\Player.cs" />
+     <Compile Include="Assets\Scripts\TimeArea.cs" />
      <Compile Include="Assets\Scripts\Worker.cs" />
      <None Include="Assets\Ludiq\Ludiq.Chronos\Readme.txt" />
-     <None Include="Assets\Data\test.txt" />
+     <None Include="Assets\Shaders\OutLine.shader" />
+     <None Include="Assets\Data\test2.txt" />
+     <None Include="Assets\Data\out.txt" />
+     <None Include="Assets\Data\test1.txt" />
     <Reference Include="UnityEngine">
         <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.3f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -672,91 +682,91 @@
         <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.3f1/Editor/Data/MonoBleedingEdge/lib/mono/unityscript/Boo.Lang.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Animation.Runtime">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Animation.Runtime.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Animation.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.PixelPerfect.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.PixelPerfect.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.PixelPerfect.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.SpriteShape.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.SpriteShape.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.SpriteShape.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Path.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Path.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Path.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Animation.Triangle.Runtime">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Animation.Triangle.Runtime.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Animation.Triangle.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="PsdPlugin">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/PsdPlugin.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/PsdPlugin.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.Postprocessing.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.Postprocessing.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Mathematics">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.Mathematics.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Psdimporter.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Psdimporter.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Psdimporter.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.InternalAPIEngineBridge.001">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.001.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.InternalAPIEngineBridge.001.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Sprite.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Common.Runtime">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Common.Runtime.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Common.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Tilemap.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.SpriteShape.Runtime">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.SpriteShape.Runtime.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.SpriteShape.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.PixelPerfect">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.PixelPerfect.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.PixelPerfect.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Animation.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Animation.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Animation.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Mathematics.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.Mathematics.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Common.Editor">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.2D.Common.Editor.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.2D.Common.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.InternalAPIEditorBridge.001">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/Unity.InternalAPIEditorBridge.001.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/Unity.InternalAPIEditorBridge.001.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
-        <HintPath>C:/WorkPlace/TimeFactory/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+        <HintPath>C:/WorkPlace/Time_Factory/TimeFactory/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
