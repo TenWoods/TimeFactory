@@ -14,23 +14,26 @@ public class TimeArea : BaseTimeObject
     private Material lineMaterial;
     /*按钮*/
     [SerializeField]
-    private GameObject[] buttons;
+    private Button[] buttons;
     private bool isButtonON;
-    /*能力时间进度条*/
-    [SerializeField]
-    private GameObject powerTime_obj;
-    private Slider powerTime_slider;
     /*能力时间*/
     [SerializeField]
     [Header("持续时间")]
     private float power_time;
-    private float power_timer;
+    private float power_timer = 0.0f;
+    /*能力时间进度条*/
+    [SerializeField]
+    private Slider powerTime_slider;
+    private bool isPowerON;
     private AreaClock3D m_clock;
     [SerializeField]
     [Header("冷却时间")]
     private float powerCD;
-    private float powerCD_timer;
-    private bool isPowerON;
+    private float powerCD_timer = 0.0f;
+    /*冷却时间进度条*/
+    [SerializeField]
+    private Slider powerCD_slider;
+    private bool isPowerCD;
     [SerializeField]
     [Header("加速程度")]
     private float accelerate_scale;
@@ -47,30 +50,41 @@ public class TimeArea : BaseTimeObject
         isSelected = false;
         isButtonON = false;
         isPowerON = false;
-        powerTime_slider = powerTime_obj.GetComponent<Slider>();
+        isPowerCD = false;
     }
 
     private void Update()
     {
         if (isPowerON)
         {
-            powerTime_obj.SetActive(true);
+            powerTime_slider.gameObject.SetActive(true);
             powerTime_slider.value = 1.0f - power_timer / power_time;
             power_timer += time.deltaTime;
             if (power_timer > power_time)
             {
                 isPowerON = false;
                 power_timer = 0.0f;
-                powerTime_obj.SetActive(false);
                 powerTime_slider.value = 1.0f;
                 m_clock.localTimeScale = 1.0f;
+                powerTime_slider.gameObject.SetActive(false);
             }
         }
-        else
+        if (isPowerCD)
         {
-            powerTime_obj.SetActive(false);
+            powerCD_slider.value = 1.0f - powerCD_timer / powerCD;
+            powerCD_timer += time.deltaTime;
+            if (powerCD_timer > powerCD)
+            {
+                powerCD_timer = 0.0f;
+                isPowerCD = false;
+                for (int i = 0; i < buttons.Length; i++)
+                {
+                    buttons[i].interactable = true;
+                }
+                powerCD_slider.value = 1.0f;
+                powerCD_slider.gameObject.SetActive(false);
+            }
         }
-
     }
 
     private void OnRenderObject() 
@@ -134,7 +148,11 @@ public class TimeArea : BaseTimeObject
     {
         for (int i = 0; i < buttons.Length; i++)
         {
-            buttons[i].SetActive(true);
+            buttons[i].gameObject.SetActive(true);
+        }
+        if (isPowerCD)
+        {
+            powerCD_slider.gameObject.SetActive(true);
         }
     }
 
@@ -142,8 +160,9 @@ public class TimeArea : BaseTimeObject
     {
         for (int i = 0; i < buttons.Length; i++)
         {
-            buttons[i].SetActive(false);
+            buttons[i].gameObject.SetActive(false);
         }
+        powerCD_slider.gameObject.SetActive(false);
     }
 
     public void Accelerate()
@@ -152,8 +171,10 @@ public class TimeArea : BaseTimeObject
         isPowerON = true;
         for (int i = 0; i < buttons.Length; i++)
         {
-            buttons[i].GetComponent<Button>().interactable = false;
+            buttons[i].interactable = false;
         }
+        isPowerCD = true;
+        powerCD_slider.gameObject.SetActive(true);
     }
 
     public void Decelerate()
@@ -162,8 +183,10 @@ public class TimeArea : BaseTimeObject
         isPowerON = true;
         for (int i = 0; i < buttons.Length; i++)
         {
-            buttons[i].GetComponent<Button>().interactable = false;
+            buttons[i].interactable = false;
         }
+        isPowerCD = true;
+        powerCD_slider.gameObject.SetActive(true);
     }
 
     public void Rewind()
@@ -172,7 +195,9 @@ public class TimeArea : BaseTimeObject
         isPowerON = true;
         for (int i = 0; i < buttons.Length; i++)
         {
-            buttons[i].GetComponent<Button>().interactable = false;
+            buttons[i].interactable = false;
         }
+        isPowerCD = true;
+        powerCD_slider.gameObject.SetActive(true);
     }
 }
