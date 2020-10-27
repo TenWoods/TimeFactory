@@ -2,32 +2,50 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Overlooker : MonoBehaviour
+public class Overlooker : BaseTimeObject
 {
-    [SerializeField]
-    private int segment;
+    private int segment = 10;
     /*视野半径*/
-    [SerializeField]
-    [Header("视野距离")]
+    [SerializeField, Header("视野距离")]
     private float radius;
-    private float innerRadius = 0.0f;
-    [SerializeField]
-    [Header("视野大小")]
+    /*视野角度*/
+    [SerializeField, Header("视野角度")]
     private float degree;
     private Mesh fan_mesh;
     [SerializeField]
     private GameObject eyeArea;
+    /*场景中所有的工人*/
+    private Worker[] workers;
+    [SerializeField]
+    private GameObject cargo_point;
+    /*货物对象池*/
+    private ObjectPool watch_objPool;
     
     private void Start()
     {
-        GenerateMesh();
-        eyeArea.GetComponent<MeshFilter>().mesh = fan_mesh;
-        //eyeArea.GetComponent<MeshCollider>().sharedMesh = fan_mesh;
+        //对象池初始化
+        GameObject temp = null;
+        temp = GameObject.Find("CargoWatchPool");
+        if (temp == null)
+        {
+            Debug.Log("No CargoWatchPool");
+            return;
+        }
+        watch_objPool = temp.GetComponent<ObjectPool>();
+
+        // GenerateMesh();
+        // eyeArea.GetComponent<MeshFilter>().mesh = fan_mesh;
+        GameObject[] worker_obj = GameObject.FindGameObjectsWithTag("Worker");
+        workers = new Worker[worker_obj.Length];
+        for (int i = 0; i < worker_obj.Length; i++)
+        {
+            workers[i] = worker_obj[i].GetComponent<Worker>();
+        }
     }
 
     private void Update()
     {
-        
+        CheckWorkers();
     }
 
     private void GenerateMesh()
@@ -63,5 +81,41 @@ public class Overlooker : MonoBehaviour
         fan_mesh.uv = uvs;
         fan_mesh.RecalculateNormals();
         
+    }
+
+    private void CheckWorkers()
+    {
+        for (int i = 0; i < workers.Length; i++)
+        {
+            Vector3 dierction = workers[i].gameObject.transform.position - transform.position;
+            //Debug.Log(dierction.normalized);
+            float distance = dierction.magnitude;
+            if (distance > radius)
+            {
+                continue;
+            } 
+            // float angle = Vector3.Angle(dierction.normalized, transform.forward.normalized);
+            // Debug.Log(angle);
+            float dir_degree = Vector3.Dot(dierction.normalized, transform.forward.normalized);
+            if (dir_degree < 0)
+            {
+                continue;
+            }
+            if (dir_degree >= Mathf.Cos(degree / 2 * Mathf.Deg2Rad))
+            {
+                for (int j = 0; j < workers[i].Cargoes.Length; j++)
+                {
+                    if (workers[i].Cargoes[j] == CargoType.WATCH)
+                    {
+                        CargoType temp = workers[i].PassCargo((Direction)j);
+                        GameObject watch = watch_objPool.GetObject();
+                        watch.transform.parent = cargo_point.transform;
+                        watch.transform.localPosition = Vector3.zero;
+                        watch.transform.localScale = Vector3.one;
+                        Debug.Log("See");
+                    }
+                }
+            }
+        }
     }
 }

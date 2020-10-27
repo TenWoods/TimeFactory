@@ -165,10 +165,11 @@ public class Worker : BaseTimeObject
             break;
         }
         current_length += 1;
+        //Debug.Log("move" + move_timer.ToString());
         if (current_length > worker_routes[current_route].length)
         {
             current_route++;
-            if (current_route > (worker_routes.Count - 1))
+            if (current_route >= worker_routes.Count)
             {
                 current_route = worker_routes.Count - 1;
                 current_length = worker_routes[current_route].length;
@@ -184,7 +185,7 @@ public class Worker : BaseTimeObject
     /*按路线回退*/
     private void MoveBack()
     {
-        if (move_timer < speed)
+        if (move_timer < speed )
         {
             move_timer += time.deltaTime;
             return;
@@ -205,6 +206,7 @@ public class Worker : BaseTimeObject
             transform.position -= new Vector3(-1.0f, 0.0f, 0.0f);
             break;
         }
+       //Debug.Log("move" + move_timer.ToString());
         current_length -= 1;
         if (current_length < 0)
         {
@@ -261,6 +263,9 @@ public class Worker : BaseTimeObject
         if (other.tag == "Barrier")
         {
             move_direction  = !move_direction;
+            move_timer = 0.0f;
+            current_length -= 1;
+            //Debug.Log("Back");
             return;
         }
         else if (other.tag == "Worker")
@@ -282,7 +287,7 @@ public class Worker : BaseTimeObject
                 getD -= 4;
             if (!w.IsEmpty(getD))
                 return;
-            Debug.Log(passD.ToString() + ' ' + getD.ToString());
+            //Debug.Log(passD.ToString() + ' ' + getD.ToString());
             w.GetCargo(getD, PassCargo(passD));
         }
         else if (other.tag == "InPoint")
@@ -298,7 +303,7 @@ public class Worker : BaseTimeObject
             {
                 match_dir -= 4;
             }
-            if (match_dir == ci.In_direction)
+            if (match_dir == ci.In_direction && !ci.IsInCD())
             {
                 ci.GetCargo(PassCargo(in_dir));
             }
@@ -306,7 +311,7 @@ public class Worker : BaseTimeObject
     }
 
     /*递交货物*/
-    private CargoType PassCargo(Direction dir)
+    public CargoType PassCargo(Direction dir)
     {
         int index = (int)dir;
         CargoType c = cargoes[index];
