@@ -20,6 +20,7 @@ public class Overlooker : BaseTimeObject
     private GameObject cargo_point;
     /*货物对象池*/
     private ObjectPool watch_objPool;
+    private float time_degree = 0.0f;
     
     private void Start()
     {
@@ -33,8 +34,10 @@ public class Overlooker : BaseTimeObject
         }
         watch_objPool = temp.GetComponent<ObjectPool>();
 
-        // GenerateMesh();
-        // eyeArea.GetComponent<MeshFilter>().mesh = fan_mesh;
+        GenerateMesh();
+        eyeArea.GetComponent<MeshFilter>().mesh = fan_mesh;
+        eyeArea.transform.rotation = Quaternion.Euler(0.0f, degree / 2.0f - 90.0f, 0.0f);
+
         GameObject[] worker_obj = GameObject.FindGameObjectsWithTag("Worker");
         workers = new Worker[worker_obj.Length];
         for (int i = 0; i < worker_obj.Length; i++)
@@ -46,6 +49,8 @@ public class Overlooker : BaseTimeObject
     private void Update()
     {
         CheckWorkers();
+        time_degree += time.deltaTime * 10.0f;
+        transform.rotation = Quaternion.Euler(0.0f, time_degree, 0.0f);
     }
 
     private void GenerateMesh()
