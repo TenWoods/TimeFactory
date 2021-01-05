@@ -4,53 +4,61 @@ using UnityEngine;
 using UnityEngine.UI;
 using Chronos;
 
-[ExecuteInEditMode]
-public class TimeArea : BaseTimeObject
+public class TimeArea : MonoBehaviour
 {
     /*是否被选中*/
     public bool isSelected;
-    /*边框材质*/
-    [SerializeField]
-    private Material lineMaterial;
+    /*按钮是否出现*/
+    public bool isButtonON;
     /*按钮*/
     [SerializeField]
     private Button[] buttons;
-    private bool isButtonON;
+    
     /*能力时间*/
     [SerializeField]
     [Header("持续时间")]
-    private float power_time;
-    private float power_timer = 0.0f;
+    private int power_time;
+    private int power_timer;
+    private int power_type = -1;
     /*能力时间进度条*/
     [SerializeField]
     private Slider powerTime_slider;
+    [SerializeField]
     private bool isPowerON;
-    private AreaClock3D m_clock;
     [SerializeField]
     [Header("冷却时间")]
-    private float powerCD;
-    private float powerCD_timer = 0.0f;
+    private int powerCD;
+    private int powerCD_timer = 0;
     /*冷却时间进度条*/
     [SerializeField]
     private Slider powerCD_slider;
+    [SerializeField]
     private bool isPowerCD;
+    private Color areaColor;
     [SerializeField]
-    [Header("加速程度")]
-    private float accelerate_scale;
+    private GameManager gameManager;
+    private int last_beat;
+    private List<Worker> workers;
+    //区域内的卸货口
+    [Header("区域内的卸货口")]
     [SerializeField]
-    [Header("减速程度")]
-    private float decelerate_scale;
+    private UnloadPort[] unloadPorts;
+    //区域内的上货口
+    [Header("区域内的上货口")]
     [SerializeField]
-    private float rewind_scale;
-    
+    private LoadPort[] loadPorts;
 
     private void Start()
     {
-        m_clock = GetComponent<AreaClock3D>();
+        workers = new List<Worker>();
+        gameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
         isSelected = false;
         isButtonON = false;
         isPowerON = false;
         isPowerCD = false;
+        areaColor = GetComponent<SpriteRenderer>().color;
+        last_beat = 0;
+        //beat_count = 0;
     }
 
     private void Update()
@@ -58,24 +66,83 @@ public class TimeArea : BaseTimeObject
         if (isPowerON)
         {
             powerTime_slider.gameObject.SetActive(true);
-            powerTime_slider.value = 1.0f - power_timer / power_time;
-            power_timer += time.deltaTime;
+            powerTime_slider.value = 1.0f - (float)power_timer / power_time;
+            power_timer += (gameManager.Beat_times - last_beat);
             if (power_timer > power_time)
             {
                 isPowerON = false;
-                power_timer = 0.0f;
+                power_timer = 0;
                 powerTime_slider.value = 1.0f;
-                m_clock.localTimeScale = 1.0f;
                 powerTime_slider.gameObject.SetActive(false);
+                power_type = -1;
+                //能力时间结束还原
+                for(int i = 0; i < workers.Count; i++)
+                {
+                    workers[i].Speed = 1.0f;
+                }
+                for (int i = 0; i < loadPorts.Length; i++)
+                {
+                    loadPorts[i].Speed = 1.0f;
+                }
+                for (int i = 0; i < unloadPorts.Length; i++)
+                {
+                    unloadPorts[i].Speed = 1.0f;
+                }
             }
+            //设置范围内物体效果
+            for(int i = 0; i < workers.Count; i++)
+            {
+                if (power_type == 1)
+                {
+                    workers[i].Speed = 2.0f;
+                }
+                else if (power_type == 0)
+                {
+                    workers[i].Speed = 0.5f;
+                }
+            }
+            for (int i = 0; i < loadPorts.Length; i++)
+            {
+                if (power_type == 1)
+                {
+                    loadPorts[i].Speed = 2.0f;
+                }
+                else if (power_type == 0)
+                {
+                    loadPorts[i].Speed = 0.5f;
+                }
+            }
+            for (int i = 0; i < unloadPorts.Length; i++)
+            {
+                if (power_type == 1)
+                {
+                    unloadPorts[i].Speed = 2.0f;
+                }
+                else if (power_type == 0)
+                {
+                    unloadPorts[i].Speed = 0.5f;
+                }
+            }
+        }
+        else
+        {
+            powerTime_slider.gameObject.SetActive(false);
+        }
+        if (!isSelected && !isPowerON)
+        {
+            GetComponent<SpriteRenderer>().color = Color.clear;
+        }
+        else
+        {
+            GetComponent<SpriteRenderer>().color = areaColor; 
         }
         if (isPowerCD)
         {
-            powerCD_slider.value = 1.0f - powerCD_timer / powerCD;
-            powerCD_timer += time.deltaTime;
+            powerCD_slider.value = 1.0f - (float)powerCD_timer / powerCD;
+            powerCD_timer += (gameManager.Beat_times - last_beat);
             if (powerCD_timer > powerCD)
             {
-                powerCD_timer = 0.0f;
+                powerCD_timer = 0;
                 isPowerCD = false;
                 for (int i = 0; i < buttons.Length; i++)
                 {
@@ -85,67 +152,33 @@ public class TimeArea : BaseTimeObject
                 powerCD_slider.gameObject.SetActive(false);
             }
         }
+        last_beat = gameManager.Beat_times;
     }
 
-    private void OnRenderObject() 
+    private void OnTriggerEnter2D(Collider2D other) 
     {
-        if (!isSelected && !isPowerON)
+        if (other.tag == "Worker")
         {
-            return;
+            
+            Worker w = other.gameObject.GetComponent<Worker>();
+            workers.Add(w);
         }
-        BoxCollider collider = GetComponent<BoxCollider>();
-        if (collider == null)
-        {
-            return;
-        }
-        if (lineMaterial == null)
-        {
-            Debug.LogError("No Material!!");
-            return;
-        }
-        lineMaterial.SetPass(0);
-        GL.PushMatrix();
-        Vector3 center = collider.bounds.center;
-        Vector3 size = collider.bounds.size;
-        float rx = size.x / 2.0f;
-        float ry = size.y / 2.0f;
-        float rz = size.z / 2.0f;
-        Vector3 p0, p1, p2, p3;  
-        Vector3 p4, p5, p6, p7;
-        p0 = center + new Vector3(-rx, -ry, rz);  
-        p1 = center + new Vector3(rx, -ry, rz);  
-        p2 = center + new Vector3(rx, -ry, -rz);  
-        p3 = center + new Vector3(-rx, -ry, -rz);  
-        p4 = center + new Vector3(-rx, ry, rz);  
-        p5 = center + new Vector3(rx, ry, rz);  
-        p6 = center + new Vector3(rx, ry, -rz);  
-        p7 = center + new Vector3(-rx, ry, -rz);
-        DrawLine(p0, p1);
-        DrawLine(p1, p2);
-        DrawLine(p2, p3);
-        DrawLine(p0, p3);
-        DrawLine(p4, p5);
-        DrawLine(p5, p6); 
-        DrawLine(p6, p7);
-        DrawLine(p4, p7);
-        DrawLine(p0, p4); 
-        DrawLine(p1, p5);
-        DrawLine(p2, p6);
-        DrawLine(p3, p7);
-        GL.PopMatrix(); 
     }
 
-    private void DrawLine(Vector3 p0, Vector3 p1)
+    private void OnTriggerExit2D(Collider2D other) 
     {
-        GL.Begin(GL.LINES);  
-        GL.Color(Color.cyan);  
-        GL.Vertex(p0);  
-        GL.Vertex(p1);  
-        GL.End();  
+        if (other.tag == "Worker")
+        {
+            //Debug.Log("DELETE");
+            Worker w = other.gameObject.GetComponent<Worker>();
+            w.Speed = 1.0f;
+            workers.Remove(w);
+        }
     }
 
     public void ButtonON()
     {
+        isButtonON = true;
         for (int i = 0; i < buttons.Length; i++)
         {
             buttons[i].gameObject.SetActive(true);
@@ -158,6 +191,7 @@ public class TimeArea : BaseTimeObject
 
     public void ButtonOFF()
     {
+        isButtonON = false;
         for (int i = 0; i < buttons.Length; i++)
         {
             buttons[i].gameObject.SetActive(false);
@@ -167,7 +201,6 @@ public class TimeArea : BaseTimeObject
 
     public void Accelerate()
     {
-        m_clock.localTimeScale = accelerate_scale;
         isPowerON = true;
         for (int i = 0; i < buttons.Length; i++)
         {
@@ -175,11 +208,12 @@ public class TimeArea : BaseTimeObject
         }
         isPowerCD = true;
         powerCD_slider.gameObject.SetActive(true);
+        power_type = 1;
+        ButtonOFF();
     }
 
     public void Decelerate()
     {
-        m_clock.localTimeScale = decelerate_scale;
         isPowerON = true;
         for (int i = 0; i < buttons.Length; i++)
         {
@@ -187,17 +221,7 @@ public class TimeArea : BaseTimeObject
         }
         isPowerCD = true;
         powerCD_slider.gameObject.SetActive(true);
-    }
-
-    public void Rewind()
-    {
-        m_clock.localTimeScale = rewind_scale;
-        isPowerON = true;
-        for (int i = 0; i < buttons.Length; i++)
-        {
-            buttons[i].interactable = false;
-        }
-        isPowerCD = true;
-        powerCD_slider.gameObject.SetActive(true);
-    }
+        power_type = 0;
+        ButtonOFF();
+    } 
 }

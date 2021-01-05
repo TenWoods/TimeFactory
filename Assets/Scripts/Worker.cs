@@ -17,7 +17,8 @@ public enum Direction
 public enum CargoType
 {
     NORMAL = 0,
-    WATCH = 1,
+    Alice = 1,
+    Block = 2,
     EMPTY
 }
 
@@ -34,20 +35,26 @@ public struct Route
     }
 }
 
-public class Worker : BaseTimeObject
+public class Worker : MonoBehaviour
 {
     /*搬运工序号*/
     [Header("搬运工序号")]
     [SerializeField]
     private int id;
-    /*移动速度*/
-    [Header("搬运工移动速度")]
+    /*节拍积攒速度*/
+    [SerializeField] //Debug
+    private float speed = 1.0f;
+    [Header("单位移动距离")]
     [SerializeField]
-    private float speed;
+    /*每一次移动的距离*/
+    private float move_length = 1.0f;
     /*货物*/
     [SerializeField]
     private CargoType[] cargoes;
     private GameObject[] cargoes_obj;
+    /*货物显示偏移量*/
+    [SerializeField]
+    private float cargo_offset = 1.0f;
     /*货物计数*/
     private int cargo_count;
     /*路线文件*/
@@ -58,10 +65,16 @@ public class Worker : BaseTimeObject
     /*搬运工当前路线前进程度*/
     private int current_route;
     private int current_length;
+    private float move_cd;
     private float move_timer;
+    private int last_beat;
+    private float beat_count;
+    [SerializeField] //debug
+    private GameManager gameManager;
+    //private bool isMove = false;
     /*搬运工前进方向*/
     private bool move_direction;  //true为按路线前进，false为按路线倒退
-    private Rigidbody rd;
+    private Rigidbody2D rd;
     /*货物对象池*/
     private ObjectPool[] cargo_objPool;
     
@@ -73,9 +86,34 @@ public class Worker : BaseTimeObject
         }
     }
 
+    public bool Move_direction
+    {
+        get
+        {
+            return move_direction;
+        }
+        set
+        {
+            move_direction = value;
+        }
+    }
+
+    public float Speed 
+    {
+        get 
+        {
+            return speed;
+        }
+        set
+        {
+            speed = value;
+        }
+    }
+
     private void Start()
     {
-        cargoes = new CargoType[4]{CargoType.EMPTY, CargoType.EMPTY, CargoType.EMPTY, CargoType.EMPTY};
+        gameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManager>();
+        //cargoes = new CargoType[4]{CargoType.EMPTY, CargoType.EMPTY, CargoType.EMPTY, CargoType.EMPTY};
         cargo_count = 0;
         cargoes_obj = new GameObject[4]{null, null, null, null};
         //对象池初始化
@@ -96,18 +134,52 @@ public class Worker : BaseTimeObject
             return;
         }
         cargo_objPool[1] = temp.GetComponent<ObjectPool>();
-
+        //初始化路线
         LoadRoute();
         current_route = 0;
         current_length = 0;
-        move_timer = speed;
+        move_cd = gameManager.GCD / 2;
+        move_timer = move_cd;
+        last_beat = 0;
+        beat_count = 0.0f;
         move_direction = true;
-        rd = GetComponent<Rigidbody>();
+        rd = GetComponent<Rigidbody2D>();
 
+        for (int i = 0; i < 4; i++)
+        {
+            if (cargoes[i] != CargoType.EMPTY && cargoes[i] != CargoType.Block)
+            {
+                AddCargoObject((Direction)i, cargoes[i]);
+            }
+        }
     }
     
     private void Update()
     {
+        if (!gameManager.IsMove && (move_timer + Time.deltaTime) < speed)
+        {
+            move_timer = move_cd;
+            return;
+        }
+        //计算beat数
+        if (last_beat != gameManager.Beat_times)
+        {
+            beat_count += (gameManager.Beat_times - last_beat) * speed;
+            //Debug.Log(beat_count);
+            last_beat = gameManager.Beat_times;
+        }
+        //大于一个beat才能移动
+        if (beat_count < 1.0f)
+        {
+            return;
+        }
+        if (move_timer < move_cd)
+        {
+            move_timer += Time.deltaTime;
+            return;
+        }
+        beat_count -= 1.0f;
+        move_timer = 0.0f;
         if (move_direction)
             MoveForward();
         else
@@ -143,30 +215,23 @@ public class Worker : BaseTimeObject
     /*按路线前向移动*/
     private void MoveForward()
     {   
-        if (move_timer < speed)
-        {
-            move_timer += time.deltaTime;
-            return;
-        }
-        move_timer = 0.0f;
         switch(worker_routes[current_route].direction)
         {
             case Direction.UP :
-            transform.position += new Vector3(0.0f, 0.0f, 1.0f);
+            transform.position += new Vector3(0.0f, move_length, 0.0f);
             break;
             case Direction.DOWN :
-            transform.position += new Vector3(0.0f, 0.0f, -1.0f);
+            transform.position += new Vector3(0.0f, -move_length, 0.0f);
             break;
             case Direction.RIGHT :
-            transform.position += new Vector3(1.0f, 0.0f, 0.0f);
+            transform.position += new Vector3(move_length, 0.0f, 0.0f);
             break;
             case Direction.LEFT :
-            transform.position += new Vector3(-1.0f, 0.0f, 0.0f);
+            transform.position += new Vector3(-move_length, 0.0f, 0.0f);
             break;
         }
         current_length += 1;
-        //Debug.Log("move" + move_timer.ToString());
-        if (current_length > worker_routes[current_route].length)
+        if (current_length >= worker_routes[current_route].length)
         {
             current_route++;
             if (current_route >= worker_routes.Count)
@@ -185,30 +250,23 @@ public class Worker : BaseTimeObject
     /*按路线回退*/
     private void MoveBack()
     {
-        if (move_timer < speed )
-        {
-            move_timer += time.deltaTime;
-            return;
-        }
-        move_timer = 0.0f;
         switch(worker_routes[current_route].direction)
         {
             case Direction.UP :
-            transform.position -= new Vector3(0.0f, 0.0f, 1.0f);
+            transform.position -= new Vector3(0.0f, move_length, 0.0f);
             break;
             case Direction.DOWN :
-            transform.position -= new Vector3(0.0f, 0.0f, -1.0f);
+            transform.position -= new Vector3(0.0f, -move_length, 0.0f);
             break;
             case Direction.RIGHT :
-            transform.position -= new Vector3(1.0f, 0.0f, 0.0f);
+            transform.position -= new Vector3(move_length, 0.0f, 0.0f);
             break;
             case Direction.LEFT :
-            transform.position -= new Vector3(-1.0f, 0.0f, 0.0f);
+            transform.position -= new Vector3(-move_length, 0.0f, 0.0f);
             break;
         }
-       //Debug.Log("move" + move_timer.ToString());
         current_length -= 1;
-        if (current_length < 0)
+        if (current_length <= 0)
         {
             current_route--;
             if (current_route < 0)
@@ -222,6 +280,7 @@ public class Worker : BaseTimeObject
                 current_length = worker_routes[current_route].length;
             }
         }
+        
     }
 
     /*添加货物的的显示*/
@@ -229,20 +288,20 @@ public class Worker : BaseTimeObject
     {
         GameObject obj = cargo_objPool[(int)type].GetObject();
         obj.transform.parent = transform;
-        obj.transform.localScale = Vector3.one;
+        obj.transform.localScale = new Vector3(1.0f / transform.localScale.x, 1.0f / transform.localScale.y, 1.0f / transform.localScale.z);
         switch (dir)
         {
             case Direction.UP :
-            obj.transform.localPosition = new Vector3(0.0f, 0.0f, 1.0f);
+            obj.transform.localPosition = new Vector3(0.0f, cargo_offset, 0.0f);
             break;
             case Direction.DOWN :
-            obj.transform.localPosition = new Vector3(0.0f, 0.0f, -1.0f);
+            obj.transform.localPosition = new Vector3(0.0f, -cargo_offset, 0.0f);
             break;
             case Direction.RIGHT:
-            obj.transform.localPosition = new Vector3(1.0f, 0.0f, 0.0f);
+            obj.transform.localPosition = new Vector3(cargo_offset, 0.0f, 0.0f);
             break;
             case Direction.LEFT :
-            obj.transform.localPosition = new Vector3(-1.0f, 0.0f, 0.0f);
+            obj.transform.localPosition = new Vector3(-cargo_offset, 0.0f, 0.0f);
             break;
         }
         cargoes_obj[(int)dir] = obj;
@@ -257,7 +316,7 @@ public class Worker : BaseTimeObject
     }
 
     /*触发检测*/
-    private void OnTriggerEnter(Collider other) 
+    private void OnTriggerEnter2D(Collider2D other) 
     {
         //遇到障碍物回退
         if (other.tag == "Barrier")
@@ -292,21 +351,14 @@ public class Worker : BaseTimeObject
         }
         else if (other.tag == "InPoint")
         {
-            CargoInPoint ci = other.GetComponent<CargoInPoint>();
-            Direction in_dir = CalcuDirection(other.transform.position, transform.position);
-            if (cargoes[(int)in_dir] == CargoType.EMPTY)
+            //Debug.Log(1);
+            UnloadPort ci = other.GetComponent<UnloadPort>();
+            if (cargoes[(int)ci.In_direction] == CargoType.EMPTY || cargoes[(int)ci.In_direction] == CargoType.Block)
             {
                 return;
             }
-            Direction match_dir = in_dir + 2;
-            if ((int)match_dir > 3)
-            {
-                match_dir -= 4;
-            }
-            if (match_dir == ci.In_direction && !ci.IsInCD())
-            {
-                ci.GetCargo(PassCargo(in_dir));
-            }
+            ci.GetCargo(PassCargo(ci.In_direction));
+            Debug.Log(2);
         }
     }
 
@@ -325,24 +377,13 @@ public class Worker : BaseTimeObject
     public bool GetCargo(Direction dir, CargoType type)
     {
         int index = (int)dir;
+        //Debug.Log(cargoes[index]);
         if (cargoes[index] == CargoType.EMPTY)
         {
             cargoes[index] = type;
             cargo_count++;
             AddCargoObject(dir, type);
             return true;
-        }
-        for (int i = 0; i < 3; i++)
-        {
-            if (++index > 3)
-                index -= 4;
-            if (cargoes[index] == CargoType.EMPTY)
-            {
-                cargoes[index] = type;
-                cargo_count++;
-                AddCargoObject((Direction)index, type);
-                return true;
-            }
         }
         return false;
     }
@@ -376,6 +417,11 @@ public class Worker : BaseTimeObject
             return true;
         else
             return false;
+    }
+
+    public void ChangeMoveDirection()
+    {
+
     }
     
 }

@@ -19,26 +19,29 @@ public class Player : MonoBehaviour
 
     private void CheckArea()
     { 
-        var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
+        RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+        if (hit.collider)
         {
             if (hit.collider.tag == "AreaClock")
-            {
-                
-                current_area = hit.collider.gameObject.GetComponent<TimeArea>();
-                current_area.isSelected = true;
-            }
-            else
             {
                 if (current_area != null)
                 {
                     current_area.isSelected = false;
-                    current_area.ButtonOFF();
+                    //current_area.ButtonOFF();
                 }
+                current_area = hit.collider.gameObject.GetComponent<TimeArea>();
+                current_area.isSelected = true;
             }
         }
-        
+        else
+        {
+            if (current_area != null)
+            {
+                current_area.isSelected = false;
+                current_area.ButtonOFF();
+            }
+            current_area = null;
+        }
     }
 
     private void CheckButton()
@@ -48,6 +51,13 @@ public class Player : MonoBehaviour
             if (current_area != null)
             {
                 current_area.ButtonON();
+            }
+        }
+        if (Input.GetMouseButton(1))
+        {
+            if (current_area != null)
+            {
+                current_area.ButtonOFF();
             }
         }
     }

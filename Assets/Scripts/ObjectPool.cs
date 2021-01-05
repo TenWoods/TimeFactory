@@ -14,12 +14,19 @@ public class ObjectPool : MonoBehaviour
 
     private void Start()
     {
-        pool = new Queue<GameObject>();
+        if (pool == null)
+        {
+            pool = new Queue<GameObject>();
+        }
     }
 
     /*对象池弹出对象*/
     public GameObject GetObject()
     {
+        if (pool == null)
+        {
+            pool = new Queue<GameObject>();
+        }
         if (pool.Count == 0)
         {
             return GameObject.Instantiate(prefab);

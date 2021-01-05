@@ -8,6 +8,8 @@ TagManager:
   - Worker
   - InPoint
   - AreaClock
+  - GameManager
+  - OutPoint
   layers:
   - Default
   - TransparentFX
